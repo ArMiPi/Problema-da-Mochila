@@ -1,6 +1,21 @@
-import items
+from item import *
+import mochila
+import interessePeso
 
-x = items.items(10)
+interessePeso.createItems("Items.txt", 10)
 
-print(x.interest)
-print(x.weight)
+li = item.getItems("Items.txt", 10)
+
+for i in li:
+    print("ID: "+str(i.id))
+    print("Interesse: "+str(i.interest))
+    print("Peso: "+str(i.weight))
+    print()
+
+li = item.sortItems(li)
+
+mochila.exaustivo(li)
+
+#del x.weight[:]
+
+#print(x.weight)
