@@ -2,20 +2,22 @@ from item import *
 import mochila
 import interessePeso
 
-interessePeso.createItems("Items.txt", 10)
+# Quantidade de itens que serão utilizados
+NUM_ITEMS = 100
 
-li = item.getItems("Items.txt", 10)
+# Número do teste que está sendo executado
+teste = 3
 
-for i in li:
-    print("ID: "+str(i.id))
-    print("Interesse: "+str(i.interest))
-    print("Peso: "+str(i.weight))
-    print()
+# Local onde a lista de itens será salva
+pathItems = "Testes/Mochilas/" + str(NUM_ITEMS) + "-Items/Mochila-" + str(teste) + "-Items.txt"
+
+# Local onde a lista de melhores possbilidades será salva
+pathBestInterests = "Testes/Mochilas/" + str(NUM_ITEMS) + "-Items/Mochila-" + str(teste) + "-BestInterests-Exaustao.txt"
+
+interessePeso.createItems(pathItems, NUM_ITEMS)
+
+li = item.getItems(pathItems, NUM_ITEMS)
 
 li = item.sortItems(li)
 
-mochila.exaustivo(li)
-
-#del x.weight[:]
-
-#print(x.weight)
+mochila.exaustivo(pathBestInterests, li)

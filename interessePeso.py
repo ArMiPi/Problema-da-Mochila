@@ -10,7 +10,12 @@ MAX_INTEREST = 100
 MIN_WEIGHT = 10
 MAX_WEIGHT = 100
 
-# Cria um arquivo indicado pelo path. Esse arquivo irá conter size itens com interesses de MIN_INTEREST a MAX_INTEREST, e pesos de MIN_WEIGHT a MAX_WEIGHT
+# Entrada:
+#   path -> string -> Local e nome do arquivo com os itens que serão utilizados
+#   size -> int -> Quantidade de itens que serão utilizados
+# Descrição:
+#   Cria um arquivo indicado pelo path. Esse arquivo irá conter size itens com interesses de MIN_INTEREST a MAX_INTEREST, 
+#   e pesos de MIN_WEIGHT a MAX_WEIGHT
 def createItems(path, size):
     # Cria o arquivo
     arq = open(path, "w")
