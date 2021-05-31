@@ -1,4 +1,3 @@
-from os import system
 from time import time
 
 # Tempo limite, em segundos, para a execução do método exaustivo
@@ -68,24 +67,33 @@ def possibility(p, li, first, cap):
     temp = 0
     # Percorre a lista da posição first até a posição 0
     for i in range(first-1, -1, -1):
+        # Quantidade do item li[i] que pode ser inserida na mochila
         temp = int(cap / int(li[i].weight))
         p[i] = temp
+        # Capacidade restante na mochila
         cap -= (temp * int(li[i].weight))
 
         if cap <= 0:
             break
 
 
-# Retorna o interesse total da possibiladade analisada
+# Entradas:
+#   p -> list -> Lista contendo uma possibilidade de preenchimento da mochila
+#   li -> list -> Lista contendo as informações dos itens utilizados
+# Saída:
+#   int -> Interesse total da possibilidade analisada
+# Descrição:
+#   Retorna o interesse total da possibiladade analisada
 def possibInterest(p, li):
     pI = 0
 
+    # Soma de interesse * quantidade de itens para cada item da lista
     for i in range(len(p)):
         pI += p[i] * int(li[i].interest)
 
     return pI
 
-# Entrada:
+# Entradas:
 #   path -> string -> Local e nome do arquivo com as melhores possibilidades
 #   li -> list -> Lista contendo as informações dos itens utilizados
 # Descrição:
@@ -108,6 +116,7 @@ def exaustivo(path, li):
 
     # Maior interesse
     bestInterest = 0
+
     pI = 0
 
     # Flag marcando o tempo atual
@@ -117,14 +126,16 @@ def exaustivo(path, li):
     while currentTime < MAX_TIME and fnz != -1:
         # Armazena o interesse total da possibilidade atual
         pI = possibInterest(possib, li)
-
+        print(possib)
         # Preenchimento da lista com a(s) melhor(es) possibilidade(s)
+        # Substitui os dados armazenados em path por possib
         if pI > bestInterest:
             bestInterest = pI
             arq = open(path, "w")
             arq.write("Best Interest: " + str(bestInterest) + "\n")
             arq.write(str(possib) + "\n")
             arq.close()
+        # Adiciona possib à path
         elif pI == bestInterest:
             arq = open(path, "a")
             arq.write(str(possib) + "\n")
@@ -136,9 +147,97 @@ def exaustivo(path, li):
 
         # Atualização do tempo atual
         currentTime = time() - start
-        print(currentTime)
-        system("cls")
 
+    # Salva em path o tempo de execução da função
+    arq = open(path, "a")
+    arq.write("Tempo decorrido: " + str(currentTime) + " s")
+    arq.close()
+
+# Entradas:
+#   possib -> list -> Lista contendo uma possibilidade de preenchimento da mochila
+#   li -> list -> Lista contendo as informações dos itens utilizados
+#   first -> int -> Posição inicial a ser considerada
+#   cap -> int -> Capacidade da mocihla
+# Saída:
+#   double -> Limitante Superior
+#  Descrição:
+#   Calcula um limitante superior da seguinte forma:
+#   ls = (somatório[i = first, len(possib)] li[i].interest*possib[i]) + 
+#   ((li[first-1].interest)/li[first-1].weight) * (cap - (somatório[i = first, len(possib)] int(li[i].weight) * possib[i]))
+def limitanteSuperior(possib, li, first, cap):
+    # somatório[i = first, len(possib)] li[i].interest*possib[i]
+    lim = 0
+    for i in range(first, len(possib)):
+        lim += (int(li[i].interest) * possib[i])
+    
+    # somatório[i = first, len(possib)] li[i].weight * possib[i])
+    lp = 0
+    for i in range(first, len(possib)):
+        lp += (int(li[i].weight) * possib[i])
+    
+    lim += (int(li[i-1].interest) / int(li[i-1].weight)) * (cap - lp)
+
+    return lim
+
+# Entradas:
+#   path -> string -> Local e nome do arquivo com as melhores possibilidades
+#   li -> list -> Lista contendo as informações dos itens utilizados
+# Descrição:
+#   Resolve o problema da mochila utilizando um limitante superior, armazenando em um arquivo .txt a(s) melhor(es) possibilidade(s)
+#   encontradas para preencher a mochila, bem como o tempo de execução da função e o valor da(s) melhor(es)
+#   possibilidade(s)
+def limitante(path, li):
+    # Flag marcando o tempo no qual a função foi chamada
+    start = time()
+
+    # Capacidade da mochila
+    cap = capacity(li)
+
+    # Lista para armazenar as possibilidades
+    possib = [0] * len(li)
+    possibility(possib, li, len(li), cap)
+    
+    # Maior interesse
+    bestInterest = possibInterest(possib, li)
+    pI = 0
+
+    arq = open(path, "w")
+    arq.write("Best Interest: " + str(bestInterest) + "\n")
+    arq.write(str(possib) + "\n")
+    arq.close()
+
+    # Variável para armazenar a primeira posição que possui um valor não zero
+    fnz = firstNotZero(possib)
+
+    # A execução termina quando toda as opções forem esgotadas ou quando se passarem MAX_TIME segundos
+    while fnz != -1:
+        if limitanteSuperior(possib, li, fnz, cap) >= bestInterest:
+            possibility(possib, li, fnz, cap)
+
+            pI = possibInterest(possib, li)
+
+            print(possib)
+            print("Limitante = " + str(limitanteSuperior(possib, li, fnz, cap)))
+            # Preenchimento da lista com a(s) melhor(es) possibilidade(s)
+            # Substitui os dados armazenados em path por possib
+            if pI > bestInterest:
+                bestInterest = pI
+                arq = open(path, "w")
+                arq.write("Best Interest: " + str(bestInterest) + "\n")
+                arq.write(str(possib) + "\n")
+                arq.close()
+            # Adiciona possib à path
+            elif pI == bestInterest:
+                arq = open(path, "a")
+                arq.write(str(possib) + "\n")
+                arq.close()
+        # Zera a posição fnz de possib caso fnz não seja a última posição
+        if fnz != (len(possib) -1):
+            possib[fnz] = 0
+        fnz = firstNotZero(possib)
+        
+    # Tempo de execução da função
+    currentTime = time() - start
     arq = open(path, "a")
     arq.write("Tempo decorrido: " + str(currentTime) + " s")
     arq.close()
